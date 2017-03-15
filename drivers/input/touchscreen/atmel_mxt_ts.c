@@ -4287,11 +4287,14 @@ static void mxt_clear_touch_event(struct mxt_data *data)
 	input_sync(input_dev);
 }
 
+extern int do_pinmux_setting(char *buf);
+
 static int mxt_suspend(struct device *dev)
 {
 	struct i2c_client *client = to_i2c_client(dev);
 	struct mxt_data *data = i2c_get_clientdata(client);
 	struct input_dev *input_dev = data->input_dev;
+	char buf[100];
 
 	if (!input_dev)
  		return 0;
@@ -4314,6 +4317,9 @@ static int mxt_suspend(struct device *dev)
 		if (gpio_is_valid(data->pdata->reset_gpio))
 			gpio_set_value(data->pdata->reset_gpio, 0);
 
+		strcpy(buf, "kb_row7_pr7 rsvd2 OUTPUT NORMAL TRISTATE DEFAULT");
+		do_pinmux_setting(buf);
+
 		mutex_unlock(&input_dev->mutex);
 	}
 	mxt_clear_touch_event(data);
@@ -4326,6 +4332,7 @@ static void mxt_reset_work(struct work_struct *work)
 	struct mxt_data *data = container_of(work, struct mxt_data, reset_work);
 	struct input_dev *input_dev = data->input_dev;
 	int error;
+	char buf[100];
 
 	mutex_lock(&input_dev->mutex);
 
@@ -4344,6 +4351,9 @@ static void mxt_reset_work(struct work_struct *work)
 
 	if (gpio_is_valid(data->pdata->reset_gpio))
 		gpio_set_value_cansleep(data->pdata->reset_gpio, 1);
+
+	strcpy(buf, "kb_row7_pr7 rsvd2 INPUT PULL_UP NORMAL DEFAULT");
+	do_pinmux_setting(buf);
 
 	msleep(10);
 	mxt_wait_for_chg(data);
