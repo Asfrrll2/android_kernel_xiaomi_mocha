@@ -129,12 +129,17 @@ struct synaptics_rmi4_fn_full_addr {
 	unsigned short data_base;
 };
 
+struct synaptics_rmi4_f11_extra_data {
+	unsigned char data38_offset;
+};
+
 struct synaptics_rmi4_f12_extra_data {
 	unsigned char data1_offset;
 	unsigned char data4_offset;
 	unsigned char data15_offset;
 	unsigned char data15_size;
 	unsigned char data15_data[(F12_FINGERS_TO_SUPPORT + 7) / 8];
+        unsigned char ctrl20_offset;
 };
 
 /*
@@ -154,7 +159,6 @@ struct synaptics_rmi4_fn {
 	unsigned char fn_number;
 	unsigned char num_of_data_sources;
 	unsigned char num_of_data_points;
-	unsigned char size_of_data_register_block;
 	unsigned char intr_reg_num;
 	unsigned char intr_mask;
 	struct synaptics_rmi4_fn_full_addr full_addr;
@@ -252,8 +256,12 @@ struct synaptics_rmi4_data {
 	bool irq_enabled;
 	bool touch_stopped;
 	bool fingers_on_2d;
+        bool suspend;
 	bool sensor_sleep;
 	bool stay_awake;
+	bool f11_wakeup_gesture;
+ 	bool f12_wakeup_gesture;
+ 	bool enable_wakeup_gesture;
 	bool staying_awake;
 	bool wakeup_enable;
 	int (*irq_enable)(struct synaptics_rmi4_data *rmi4_data, bool enable);
